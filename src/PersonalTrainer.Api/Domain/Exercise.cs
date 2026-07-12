@@ -10,6 +10,7 @@ public sealed class Exercise
     public decimal? WeightKg { get; set; }
     public string? Notes { get; set; }
     public int OrderIndex { get; set; }
+    public List<string> Tags { get; set; } = [];
 
     public WorkoutPlan WorkoutPlan { get; set; } = null!;
 }

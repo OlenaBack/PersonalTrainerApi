@@ -8,4 +8,5 @@ public sealed record ExerciseResponse(
     int Reps,
     decimal? WeightKg,
     string? Notes,
-    int OrderIndex);
+    int OrderIndex,
+    IReadOnlyList<string> Tags);

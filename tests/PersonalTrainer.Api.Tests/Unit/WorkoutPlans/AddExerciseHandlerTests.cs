@@ -22,12 +22,13 @@ public class AddExerciseHandlerTests
         await dbContext.SaveChangesAsync();
 
         var handler = new AddExerciseHandler(dbContext, new FakeCurrentTrainerAccessor(trainer));
-        var request = new AddExerciseRequest("Squat", 3, 10, 60m, null, 0);
+        var request = new AddExerciseRequest("Squat", 3, 10, 60m, null, 0, ["Legs", "Core"]);
 
         var result = await handler.HandleAsync(plan.Id, request, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be("Squat");
+        result.Value.Tags.Should().BeEquivalentTo("Legs", "Core");
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public class AddExerciseHandlerTests
         await dbContext.SaveChangesAsync();
 
         var handler = new AddExerciseHandler(dbContext, new FakeCurrentTrainerAccessor(trainer));
-        var request = new AddExerciseRequest("Squat", 3, 10, 60m, null, 0);
+        var request = new AddExerciseRequest("Squat", 3, 10, 60m, null, 0, null);
 
         var result = await handler.HandleAsync(plan.Id, request, CancellationToken.None);
 

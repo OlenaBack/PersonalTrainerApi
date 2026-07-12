@@ -30,7 +30,7 @@ public class WorkoutPlansEndpointsTests(CustomWebApplicationFactory factory) : I
         var createdPlan = await planResponse.Content.ReadFromJsonAsync<WorkoutPlanResponse>();
 
         var exerciseResponse = await client.PostAsJsonAsync($"/api/workout-plans/{createdPlan!.Id}/exercises", new AddExerciseRequest(
-            "Squat", 3, 10, 60m, null, 0));
+            "Squat", 3, 10, 60m, null, 0, ["Legs", "Core"]));
         exerciseResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var listResponse = await client.GetAsync($"/api/clients/{createdClient.Id}/workout-plans");

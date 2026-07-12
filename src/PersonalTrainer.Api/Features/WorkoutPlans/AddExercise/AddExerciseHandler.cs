@@ -31,11 +31,12 @@ public sealed class AddExerciseHandler(AppDbContext dbContext, ICurrentTrainerAc
             WeightKg = request.WeightKg,
             Notes = request.Notes,
             OrderIndex = request.OrderIndex,
+            Tags = request.Tags?.ToList() ?? [],
         };
 
         dbContext.Exercises.Add(exercise);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new ExerciseResponse(exercise.Id, exercise.WorkoutPlanId, exercise.Name, exercise.Sets, exercise.Reps, exercise.WeightKg, exercise.Notes, exercise.OrderIndex);
+        return new ExerciseResponse(exercise.Id, exercise.WorkoutPlanId, exercise.Name, exercise.Sets, exercise.Reps, exercise.WeightKg, exercise.Notes, exercise.OrderIndex, exercise.Tags);
     }
 }
