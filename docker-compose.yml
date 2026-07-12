@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: personal-trainer-postgres
+    environment:
+      POSTGRES_USER: personal_trainer
+      POSTGRES_PASSWORD: personal_trainer
+      POSTGRES_DB: personal_trainer
+    ports:
+      - "5432:5432"
+    volumes:
+      - personal-trainer-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  personal-trainer-postgres-data:
