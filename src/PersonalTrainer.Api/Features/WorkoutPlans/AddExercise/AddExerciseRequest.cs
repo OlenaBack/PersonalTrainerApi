@@ -1,10 +1,9 @@
 namespace PersonalTrainer.Api.Features.WorkoutPlans.AddExercise;
 
 public sealed record AddExerciseRequest(
-    string Name,
+    Guid ExerciseId,
     int Sets,
     int Reps,
     decimal? WeightKg,
     string? Notes,
-    int OrderIndex,
-    IReadOnlyList<string>? Tags);
+    int OrderIndex);

@@ -12,6 +12,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<WorkoutPlan> WorkoutPlans => Set<WorkoutPlan>();
     public DbSet<Exercise> Exercises => Set<Exercise>();
+    public DbSet<WorkoutPlanExercise> WorkoutPlanExercises => Set<WorkoutPlanExercise>();
     public DbSet<Session> Sessions => Set<Session>();
 
     protected override void OnModelCreating(ModelBuilder builder)

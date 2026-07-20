@@ -7,7 +7,7 @@ namespace PersonalTrainer.Api.Features.WorkoutPlans.AddExercise;
 
 public sealed class AddExerciseHandler(AppDbContext dbContext, ICurrentTrainerAccessor currentTrainerAccessor)
 {
-    public async Task<Result<ExerciseResponse>> HandleAsync(Guid planId, AddExerciseRequest request, CancellationToken cancellationToken)
+    public async Task<Result<WorkoutPlanExerciseResponse>> HandleAsync(Guid planId, AddExerciseRequest request, CancellationToken cancellationToken)
     {
         var trainer = await currentTrainerAccessor.GetCurrentTrainerAsync(cancellationToken);
         if (trainer is null)
@@ -21,22 +21,39 @@ public sealed class AddExerciseHandler(AppDbContext dbContext, ICurrentTrainerAc
             return Error.NotFound("WorkoutPlans.NotFound", "Workout plan not found.");
         }
 
-        var exercise = new Exercise
+        var exercise = await dbContext.Exercises.SingleOrDefaultAsync(
+            e => e.Id == request.ExerciseId && e.TrainerId == trainer.Id, cancellationToken);
+        if (exercise is null)
+        {
+            return Error.NotFound("WorkoutPlans.ExerciseNotFound", "Exercise not found.");
+        }
+
+        var planExercise = new WorkoutPlanExercise
         {
             Id = Guid.NewGuid(),
             WorkoutPlanId = planId,
-            Name = request.Name,
+            ExerciseId = exercise.Id,
+            TrainerId = trainer.Id,
             Sets = request.Sets,
             Reps = request.Reps,
             WeightKg = request.WeightKg,
             Notes = request.Notes,
             OrderIndex = request.OrderIndex,
-            Tags = request.Tags?.ToList() ?? [],
         };
 
-        dbContext.Exercises.Add(exercise);
+        dbContext.WorkoutPlanExercises.Add(planExercise);
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new ExerciseResponse(exercise.Id, exercise.WorkoutPlanId, exercise.Name, exercise.Sets, exercise.Reps, exercise.WeightKg, exercise.Notes, exercise.OrderIndex, exercise.Tags);
+        return new WorkoutPlanExerciseResponse(
+            planExercise.Id,
+            planExercise.WorkoutPlanId,
+            exercise.Id,
+            exercise.Name,
+            exercise.Tags,
+            planExercise.Sets,
+            planExercise.Reps,
+            planExercise.WeightKg,
+            planExercise.Notes,
+            planExercise.OrderIndex);
     }
 }
