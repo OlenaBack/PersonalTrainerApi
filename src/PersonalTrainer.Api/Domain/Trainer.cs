@@ -12,4 +12,5 @@ public sealed class Trainer
 
     public ApplicationUser User { get; set; } = null!;
     public ICollection<Client> Clients { get; set; } = new List<Client>();
+    public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
 }
