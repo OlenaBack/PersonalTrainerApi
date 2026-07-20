@@ -1,0 +1,8 @@
+@workspace This repo uses vertical-slice architecture. I want to understand the AddExercise slice in WorkoutPlans, both generally and specifically. #file:AddExerciseRequest.cs #file:AddExerciseHandler.cs #file:AddExerciseValidator.cs #file:AddExerciseEndpoint.cs Answer in this structure: SUMMARY (2-3 sentences): What business capability does this slice deliver, in plain terms?
+1.	Responsibility & business requirement — what user-facing need does this satisfy (a trainer adding an exercise to a client's workout plan)?
+2.	Architecture pattern — briefly state the general convention this repo uses for a vertical slice (what files typically make up one: Request/Handler/Validator/Endpoint), then show how AddExercise specifically follows it. What does Result<T> represent as a return type?
+3.	External dependencies — DB context, DI-injected services, auth/ownership checks used by this slice.
+4.	Security considerations — what auth/ownership checks exist, how input is validated, anything that trusts client input without verification.
+5.	Test coverage — is this slice covered by unit and/or integration tests? Reference the actual test file(s) if you find them.
+6.	Main risks (2) — the two most important things a developer should watch for when modifying this slice. CLOSING SUMMARY (2-3 sentences): the single most important thing to know before touching this code. For every claim, cite the specific file and member/line you're referencing. If something isn't present in the code (e.g. no tests found), say so explicitly rather than guessing.
+Write the full answer into a new markdown file at docs/addexercise-review.md instead of only replying in chat.
