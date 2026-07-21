@@ -3,6 +3,8 @@ using System.Net.Http.Json;
 using FluentAssertions;
 using PersonalTrainer.Api.Features.Clients;
 using PersonalTrainer.Api.Features.Clients.CreateClient;
+using PersonalTrainer.Api.Features.Exercises;
+using PersonalTrainer.Api.Features.Exercises.CreateExercise;
 using PersonalTrainer.Api.Features.WorkoutPlans;
 using PersonalTrainer.Api.Features.WorkoutPlans.AddExercise;
 using PersonalTrainer.Api.Features.WorkoutPlans.CreateWorkoutPlan;
@@ -29,8 +31,12 @@ public class WorkoutPlansEndpointsTests(CustomWebApplicationFactory factory) : I
         planResponse.StatusCode.Should().Be(HttpStatusCode.Created);
         var createdPlan = await planResponse.Content.ReadFromJsonAsync<WorkoutPlanResponse>();
 
+        var catalogResponse = await client.PostAsJsonAsync("/api/exercises", new CreateExerciseRequest("Squat", ["Legs", "Core"]));
+        catalogResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        var catalogExercise = await catalogResponse.Content.ReadFromJsonAsync<ExerciseResponse>();
+
         var exerciseResponse = await client.PostAsJsonAsync($"/api/workout-plans/{createdPlan!.Id}/exercises", new AddExerciseRequest(
-            "Squat", 3, 10, 60m, null, 0, ["Legs", "Core"]));
+            catalogExercise!.Id, 3, 10, 60m, null, 0));
         exerciseResponse.StatusCode.Should().Be(HttpStatusCode.Created);
 
         var listResponse = await client.GetAsync($"/api/clients/{createdClient.Id}/workout-plans");

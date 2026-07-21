@@ -13,6 +13,8 @@ public sealed class WorkoutPlanConfiguration : IEntityTypeConfiguration<WorkoutP
         builder.Property(w => w.Title).HasMaxLength(200).IsRequired();
         builder.Property(w => w.Description).HasMaxLength(2000);
 
+        builder.HasAlternateKey(w => new { w.TrainerId, w.Id });
+
         builder.HasOne(w => w.Client)
             .WithMany(c => c.WorkoutPlans)
             .HasForeignKey(w => w.ClientId)

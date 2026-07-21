@@ -13,6 +13,6 @@ public sealed class WorkoutPlan
 
     public Client Client { get; set; } = null!;
     public Trainer Trainer { get; set; } = null!;
-    public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+    public ICollection<WorkoutPlanExercise> Exercises { get; set; } = new List<WorkoutPlanExercise>();
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
 }

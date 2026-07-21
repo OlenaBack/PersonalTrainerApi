@@ -16,19 +16,22 @@ public class AddExerciseHandlerTests
         var trainer = new Trainer { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), FirstName = "Jane", LastName = "Doe", CreatedAtUtc = DateTime.UtcNow };
         var client = new Client { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), TrainerId = trainer.Id, FirstName = "Alice", LastName = "Adams", DateOfBirth = new DateOnly(1995, 5, 1), CreatedAtUtc = DateTime.UtcNow };
         var plan = new WorkoutPlan { Id = Guid.NewGuid(), ClientId = client.Id, TrainerId = trainer.Id, Title = "Strength Basics", StartDate = new DateOnly(2026, 1, 1), CreatedAtUtc = DateTime.UtcNow };
+        var exercise = new Exercise { Id = Guid.NewGuid(), TrainerId = trainer.Id, Name = "Squat", Tags = ["Legs", "Core"], CreatedAtUtc = DateTime.UtcNow };
         dbContext.Trainers.Add(trainer);
         dbContext.Clients.Add(client);
         dbContext.WorkoutPlans.Add(plan);
+        dbContext.Exercises.Add(exercise);
         await dbContext.SaveChangesAsync();
 
         var handler = new AddExerciseHandler(dbContext, new FakeCurrentTrainerAccessor(trainer));
-        var request = new AddExerciseRequest("Squat", 3, 10, 60m, null, 0, ["Legs", "Core"]);
+        var request = new AddExerciseRequest(exercise.Id, 3, 10, 60m, null, 0);
 
         var result = await handler.HandleAsync(plan.Id, request, CancellationToken.None);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be("Squat");
         result.Value.Tags.Should().BeEquivalentTo("Legs", "Core");
+        result.Value.Sets.Should().Be(3);
     }
 
     [Fact]
@@ -39,13 +42,39 @@ public class AddExerciseHandlerTests
         var otherTrainer = new Trainer { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), FirstName = "Bob", LastName = "Lee", CreatedAtUtc = DateTime.UtcNow };
         var client = new Client { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), TrainerId = otherTrainer.Id, FirstName = "Alice", LastName = "Adams", DateOfBirth = new DateOnly(1995, 5, 1), CreatedAtUtc = DateTime.UtcNow };
         var plan = new WorkoutPlan { Id = Guid.NewGuid(), ClientId = client.Id, TrainerId = otherTrainer.Id, Title = "Strength Basics", StartDate = new DateOnly(2026, 1, 1), CreatedAtUtc = DateTime.UtcNow };
+        var exercise = new Exercise { Id = Guid.NewGuid(), TrainerId = trainer.Id, Name = "Squat", CreatedAtUtc = DateTime.UtcNow };
         dbContext.Trainers.AddRange(trainer, otherTrainer);
         dbContext.Clients.Add(client);
         dbContext.WorkoutPlans.Add(plan);
+        dbContext.Exercises.Add(exercise);
         await dbContext.SaveChangesAsync();
 
         var handler = new AddExerciseHandler(dbContext, new FakeCurrentTrainerAccessor(trainer));
-        var request = new AddExerciseRequest("Squat", 3, 10, 60m, null, 0, null);
+        var request = new AddExerciseRequest(exercise.Id, 3, 10, 60m, null, 0);
+
+        var result = await handler.HandleAsync(plan.Id, request, CancellationToken.None);
+
+        result.IsFailure.Should().BeTrue();
+        result.Error!.Type.Should().Be(ErrorType.NotFound);
+    }
+
+    [Fact]
+    public async Task HandleAsync_ExerciseOwnedByOtherTrainer_ReturnsNotFound()
+    {
+        await using var dbContext = TestDbContextFactory.Create();
+        var trainer = new Trainer { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), FirstName = "Jane", LastName = "Doe", CreatedAtUtc = DateTime.UtcNow };
+        var otherTrainer = new Trainer { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), FirstName = "Bob", LastName = "Lee", CreatedAtUtc = DateTime.UtcNow };
+        var client = new Client { Id = Guid.NewGuid(), UserId = Guid.NewGuid(), TrainerId = trainer.Id, FirstName = "Alice", LastName = "Adams", DateOfBirth = new DateOnly(1995, 5, 1), CreatedAtUtc = DateTime.UtcNow };
+        var plan = new WorkoutPlan { Id = Guid.NewGuid(), ClientId = client.Id, TrainerId = trainer.Id, Title = "Strength Basics", StartDate = new DateOnly(2026, 1, 1), CreatedAtUtc = DateTime.UtcNow };
+        var otherTrainersExercise = new Exercise { Id = Guid.NewGuid(), TrainerId = otherTrainer.Id, Name = "Squat", CreatedAtUtc = DateTime.UtcNow };
+        dbContext.Trainers.AddRange(trainer, otherTrainer);
+        dbContext.Clients.Add(client);
+        dbContext.WorkoutPlans.Add(plan);
+        dbContext.Exercises.Add(otherTrainersExercise);
+        await dbContext.SaveChangesAsync();
+
+        var handler = new AddExerciseHandler(dbContext, new FakeCurrentTrainerAccessor(trainer));
+        var request = new AddExerciseRequest(otherTrainersExercise.Id, 3, 10, 60m, null, 0);
 
         var result = await handler.HandleAsync(plan.Id, request, CancellationToken.None);
 

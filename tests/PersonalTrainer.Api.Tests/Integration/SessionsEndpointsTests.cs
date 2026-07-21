@@ -28,13 +28,13 @@ public class SessionsEndpointsTests(CustomWebApplicationFactory factory) : IClas
         var scheduleResponse = await client.PostAsJsonAsync("/api/sessions", new ScheduleSessionRequest(
             createdClient!.Id, null, DateTime.UtcNow.AddDays(1), 60, "First session"));
         scheduleResponse.StatusCode.Should().Be(HttpStatusCode.Created);
-        var session = await scheduleResponse.Content.ReadFromJsonAsync<SessionResponse>();
+        var session = await scheduleResponse.Content.ReadFromJsonAsync<SessionResponse>(TestJsonOptions.Default);
 
         var updateResponse = await client.PatchAsJsonAsync($"/api/sessions/{session!.Id}/status", new UpdateSessionStatusRequest(SessionStatus.Completed));
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
         var listResponse = await client.GetAsync("/api/sessions?status=Completed");
-        var sessions = await listResponse.Content.ReadFromJsonAsync<List<SessionResponse>>();
+        var sessions = await listResponse.Content.ReadFromJsonAsync<List<SessionResponse>>(TestJsonOptions.Default);
 
         sessions.Should().ContainSingle(s => s.Id == session.Id && s.Status == SessionStatus.Completed);
     }
