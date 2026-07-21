@@ -8,13 +8,11 @@ public sealed class GetClientsHandler(AppDbContext dbContext, ICurrentTrainerAcc
 {
     public async Task<Result<IReadOnlyList<ClientResponse>>> HandleAsync(GetClientsRequest request, CancellationToken cancellationToken)
     {
-        var trainerResult = await currentTrainerAccessor.GetCurrentTrainerOrErrorAsync("Clients", cancellationToken);
-        if (trainerResult.IsFailure)
+        var trainer = await currentTrainerAccessor.GetCurrentTrainerAsync(cancellationToken);
+        if (trainer is null)
         {
-            return trainerResult.Error!;
+            return Error.NotFound("Clients.TrainerProfileNotFound", "No trainer profile found for the current user.");
         }
-
-        var trainer = trainerResult.Value;
 
         var query = dbContext.Clients.Where(c => c.TrainerId == trainer.Id);
 

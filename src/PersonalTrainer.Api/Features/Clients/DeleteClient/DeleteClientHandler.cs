@@ -13,13 +13,11 @@ public sealed class DeleteClientHandler(
 {
     public async Task<Result> HandleAsync(Guid clientId, CancellationToken cancellationToken)
     {
-        var trainerResult = await currentTrainerAccessor.GetCurrentTrainerOrErrorAsync("Clients", cancellationToken);
-        if (trainerResult.IsFailure)
+        var trainer = await currentTrainerAccessor.GetCurrentTrainerAsync(cancellationToken);
+        if (trainer is null)
         {
-            return trainerResult.Error!;
+            return Error.NotFound("Clients.TrainerProfileNotFound", "No trainer profile found for the current user.");
         }
-
-        var trainer = trainerResult.Value;
 
         var client = await dbContext.Clients
             .SingleOrDefaultAsync(c => c.Id == clientId && c.TrainerId == trainer.Id, cancellationToken);

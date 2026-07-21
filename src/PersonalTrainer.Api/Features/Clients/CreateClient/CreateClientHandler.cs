@@ -12,13 +12,11 @@ public sealed class CreateClientHandler(
 {
     public async Task<Result<ClientResponse>> HandleAsync(CreateClientRequest request, CancellationToken cancellationToken)
     {
-        var trainerResult = await currentTrainerAccessor.GetCurrentTrainerOrErrorAsync("Clients", cancellationToken);
-        if (trainerResult.IsFailure)
+        var trainer = await currentTrainerAccessor.GetCurrentTrainerAsync(cancellationToken);
+        if (trainer is null)
         {
-            return trainerResult.Error!;
+            return Error.NotFound("Clients.TrainerProfileNotFound", "No trainer profile found for the current user.");
         }
-
-        var trainer = trainerResult.Value;
 
         var provisionResult = await provisioningService.CreateClientAsync(
             request.Email, request.Password, request.FirstName, request.LastName,
