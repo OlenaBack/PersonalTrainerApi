@@ -8,11 +8,13 @@ public sealed class UpdateClientHandler(AppDbContext dbContext, ICurrentTrainerA
 {
     public async Task<Result<ClientResponse>> HandleAsync(Guid clientId, UpdateClientRequest request, CancellationToken cancellationToken)
     {
-        var trainer = await currentTrainerAccessor.GetCurrentTrainerAsync(cancellationToken);
-        if (trainer is null)
+        var trainerResult = await currentTrainerAccessor.GetCurrentTrainerOrErrorAsync("Clients", cancellationToken);
+        if (trainerResult.IsFailure)
         {
-            return Error.NotFound("Clients.TrainerProfileNotFound", "No trainer profile found for the current user.");
+            return trainerResult.Error!;
         }
+
+        var trainer = trainerResult.Value;
 
         var client = await dbContext.Clients
             .SingleOrDefaultAsync(c => c.Id == clientId && c.TrainerId == trainer.Id, cancellationToken);
