@@ -7,7 +7,6 @@ using PersonalTrainer.Api.Common;
 using PersonalTrainer.Api.Data;
 using PersonalTrainer.Api.Features.Auth;
 using PersonalTrainer.Api.Features.Clients;
-using PersonalTrainer.Api.Features.Exercises;
 using PersonalTrainer.Api.Features.Sessions;
 using PersonalTrainer.Api.Features.WorkoutPlans;
 using Scalar.AspNetCore;
@@ -23,7 +22,6 @@ builder.Services.AddAppAuthentication(builder.Configuration);
 
 builder.Services.AddAuthFeature();
 builder.Services.AddClientsFeature();
-builder.Services.AddExercisesFeature();
 builder.Services.AddWorkoutPlansFeature();
 builder.Services.AddSessionsFeature();
 
@@ -92,7 +90,6 @@ using (var scope = app.Services.CreateScope())
 
 app.MapAuthEndpoints();
 app.MapClientsEndpoints();
-app.MapExercisesEndpoints();
 app.MapWorkoutPlansEndpoints();
 app.MapSessionsEndpoints();
 
